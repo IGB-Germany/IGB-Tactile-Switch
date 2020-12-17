@@ -40,6 +40,15 @@ The library enables the following functions:
 ###### void setDurationDebouncePressed(uint8_t durationDebouncePressed);
 ###### void setDurationDebounceReleased(uint8_t durationDebounceReleased);
 
+## Installation
+
+To install, use the Arduino Library Manager and search for "ComDriverSpi" and install the library.
+
+OR
+
+Download the zip file and copy the contence in to your Arduino's contributed libraries folder found in your sketchbook folder.
+
+
 License Information
 -------------------
 
