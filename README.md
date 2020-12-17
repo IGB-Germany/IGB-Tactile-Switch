@@ -2,12 +2,12 @@ IGB Arduino Library for Tactile Switches
 ================================================
 
 * Uses digital pins
-* Debounces and reads a single push, a double push, hold, long hold
+* Debounces and reads a single press, a double press, a long hold, a very long hold
 * Configuration high or low side
 
 This library allows the user to:
 * Read digital pins connected to switches
-* Get various information
+* Get various information about events
 * Configuration of the events
 
 Examples are included to get you started.

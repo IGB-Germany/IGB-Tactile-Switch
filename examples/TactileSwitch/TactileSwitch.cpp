@@ -12,22 +12,23 @@ TactileSwitch::TactileSwitch(uint8_t pin, uint8_t number, uint8_t mode, bool ena
   _state (START),
   _previousState(START),
   _clicks(0),
-  _previousClicks(0),
   _timePressed(0),
   _timeReleased(0),
-  _multiClickFeature(true)
+  _multiClickFeature(true),
+  _readTime(0),
+  _durationDebouncePressed(DURATION_DEBOUNCE_PRESSED),
+  _durationDebounceReleased(DURATION_DEBOUNCE_RELEASED)
 {
-  //Configuration of pin
+  //Configuration of switch
   if (_mode) //HIGH
   {
     //Signal from HIGH(released) to LOW(pressed)
     pinMode(_pin, INPUT);
     digitalWrite(_pin, LOW);
-    //digitalWrite(_pin, HIGH);
   }
   else //LOW
   {
-    //Signal from LOW to HIGH
+    //Signal from LOW(released) to HIGH(pressed)
     //to do optional INPUT_PULLUP
     pinMode(_pin, INPUT_PULLUP);
     //digitalWrite(_pin, HIGH);
@@ -35,7 +36,7 @@ TactileSwitch::TactileSwitch(uint8_t pin, uint8_t number, uint8_t mode, bool ena
 }
 
 //get number of switch
-uint8_t TactileSwitch::getNumber()
+uint8_t TactileSwitch::getNumber() const
 {
   return _number;
 }
@@ -47,12 +48,12 @@ void TactileSwitch::setNumber(uint8_t number)
 }
 
 //get message of switch like NO_MESSAGE, POLLING_LONG, BOUNCING_PRESSED, BOUNCING_RELEASED
-TactileSwitch::event_t TactileSwitch::getEvent()
+TactileSwitch::event_t TactileSwitch::getEvent() const
 {
   return _event;
 }
 
-TactileSwitch::message_t TactileSwitch::getMessage()
+TactileSwitch::message_t TactileSwitch::getMessage() const
 {
   return _message;
 }
@@ -72,32 +73,22 @@ uint8_t TactileSwitch::getState(void)
 }
 
 //get number of clicks
-uint8_t TactileSwitch::getClicks(void)
+int8_t TactileSwitch::getClicks(void) const
 {
   return _clicks;
 }
 
-//get time between reading switch
-uint8_t TactileSwitch::getDurationRead()
-{
-  //Serial @ 9600 _durationRead about 20ms
-  //57600 about 2ms
-  return _durationRead;
-}
-
 //read switch
-int TactileSwitch::readSwitch(void)
+void TactileSwitch::readSwitch(void)
 {
   //get current state
   getState();
 
-  //save last time to get time between polling switch
-  _readTime = millis();
-  _durationRead = _readTime - _previousReadTime;
-  //Serial.println(_durationRead);
-  if ( _durationRead >= DURATION_POLLING) _message = POLLING_LONG;
+  //get time between polling switch
+  if (millis() - _readTime >= DURATION_POLLING) _message = POLLING_SLOW;
   else _message = NO_MESSAGE;
-  _previousReadTime = _readTime;
+  //save last read time
+  _readTime = millis();
 
   //initalize
   //The button was clicked 102 times consecutively in quick succession.
@@ -162,7 +153,7 @@ int TactileSwitch::readSwitch(void)
   {
     //initalize if back from Bouncing
     _message = NO_MESSAGE;
-        
+
     //read _pin
     //if released
     //save _timeReleased
@@ -175,7 +166,7 @@ int TactileSwitch::readSwitch(void)
       _state = DEBOUNCE_RELEASE;
       //only one loop count and than next state
       //does not work if bouncing
-      // return clicks++;
+      //clicks++;
     }
 
     //if still pressed and time elapsed -> LONG PRESS
@@ -186,8 +177,7 @@ int TactileSwitch::readSwitch(void)
         _event = HOLD_LONG;
         _state = LONG_PRESS;
         //save clicks before waiting
-        return _clicks = -1;
-        //_clicks = -1;
+        _clicks = -1;
       }
       else //<= DURATION_LONG_PRESS
       {
@@ -247,9 +237,8 @@ int TactileSwitch::readSwitch(void)
       //wait
       else
       {
-
       }
-      //return 0;
+
     }
     //End of _multiClickTime
     else
@@ -261,8 +250,6 @@ int TactileSwitch::readSwitch(void)
       if (_clicks == 1)_event = CLICK;
       else if (_clicks > 1 ) _event = MULTI_CLICK;
       else _event = NO_EVENT;
-      //1, n clicks
-      return _clicks;
     }
   }
 
@@ -289,9 +276,9 @@ int TactileSwitch::readSwitch(void)
       //stay in this state
       else
       {
-        //turned logic; reset clicks here
+        //inversed logic; reset clicks here
         _event = NO_EVENT;
-        //return _clicks = 0;
+        _message = NO_MESSAGE;
         _clicks = 0;
       }
     }
@@ -311,6 +298,7 @@ int TactileSwitch::readSwitch(void)
       //wait long enough
       if ((millis() - _timeReleased) > DURATION_DEBOUNCE_RELEASED)
       {
+        _event = RELEASED_HOLD_LONG;
         //go to next state
         _state = AWAIT_PRESS;
       }
@@ -338,11 +326,10 @@ int TactileSwitch::readSwitch(void)
     {
       //turned logic; reset clicks here
       _event = NO_EVENT;
-      //return _clicks = 0;
       _clicks = 0;
     }
   }
-  
+
   //9
   else if (_state == DEBOUNCE_RELEASE_VERY_LONG)
   {
@@ -352,6 +339,7 @@ int TactileSwitch::readSwitch(void)
       //wait long enough
       if ((millis() - _timeReleased) > DURATION_DEBOUNCE_RELEASED)
       {
+        _event = RELEASED_HOLD_VERY_LONG;
         //go to next state
         _state = AWAIT_PRESS;
       }
@@ -372,14 +360,22 @@ int TactileSwitch::readSwitch(void)
     _clicks = 0;
     _message = NO_MESSAGE;
   }
-
-  //wait and return 0
-  //warning: control reaches end of non-void function [-Wreturn-type]
-  return 0;
 }
 
 //enable MULTI_CLICK feature default true
 void TactileSwitch::setMultiClickFeature(bool enable)
 {
   _multiClickFeature = enable;
+}
+
+//sets the debounce time (in milliseconds) if pressed [default: DURATION_DEBOUNCE_PRESSED = 20]
+void   TactileSwitch::setDurationDebouncePressed(uint8_t durationDebouncePressed)
+{
+  _durationDebouncePressed = durationDebouncePressed;
+}
+
+//sets the debounce time (in milliseconds) if released [default: DURATION_DEBOUNCE_RELEASED = 50].
+void TactileSwitch::setDurationDebounceReleased(uint8_t durationDebounceReleased)
+{
+  _durationDebounceReleased = durationDebounceReleased;
 }
