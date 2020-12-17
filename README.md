@@ -1,14 +1,13 @@
-IGB Arduino Library for Tactile Switches
+Library for Tactile Switches
 ================================================
 
-* Uses digital pins
-* Debounces and reads a single press, a double press, a long hold, a very long hold
-* Configuration high or low side
-
 This library allows the user to:
-* Read digital pins connected to switches
-* Get various information about events
-* Configuration of the events
+* Read digital switches connected to digital pins
+* Read various events
+* Read various messages
+* Count clicks
+* Debounces pressing and releasing
+* Configuration for high or low side
 
 Examples are included to get you started.
 
@@ -27,19 +26,27 @@ The library enables the following functions:
 
 #### General methods for class
 <hr>
-
 ###### TactileSwitch(uint8_t buttonPin, uint8_t number, uint8_t mode = HIGH, bool enablePullUp = false)
 <hr>
-#### Read switch
 
-###### checkUserAction()
-###### action getEvent();
-	
+#### Get events and messages
+<hr>
+###### event_t getEvent() const;
+###### message_t getMessage() const;
+###### void readSwitch(void);
 <hr>
 
 #### Get various information
 <hr>
+###### int8_t getClicks (void) const;
+###### uint8_t getState();
 
+<hr>
+#### Configuration
+<hr>
+###### void setMultiClickFeature(bool enable);
+###### void setDurationDebouncePressed(uint8_t durationDebouncePressed);
+###### void setDurationDebounceReleased(uint8_t durationDebounceReleased);
 
 License Information
 -------------------
