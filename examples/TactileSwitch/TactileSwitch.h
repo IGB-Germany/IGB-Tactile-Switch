@@ -41,7 +41,13 @@ class TactileSwitch
     //specified messages
     enum message_t {NO_MESSAGE, POLLING_SLOW, BOUNCING_PRESSED, BOUNCING_RELEASED};
 
-    //read pin
+    //get event of switch like NO_EVENT, CLICK, MULTI_CLICK, HOLD_LONG, HOLD_VERY_LONG
+    event_t getEvent() const;
+
+    //get message of switch like NO_MESSAGE, POLLING_LONG, BOUNCING_PRESSED, BOUNCING_RELEASED
+    message_t getMessage() const;
+
+    //read switch
     void readSwitch(void);
 
     //get number of clicks
@@ -55,12 +61,6 @@ class TactileSwitch
 
     //get state of FSM
     uint8_t getState();
-
-    //get event of switch like NO_EVENT, CLICK, MULTI_CLICK, HOLD_LONG, HOLD_VERY_LONG
-    event_t getEvent() const;
-
-    //get message of switch like NO_MESSAGE, POLLING_LONG, BOUNCING_PRESSED, BOUNCING_RELEASED
-    message_t getMessage() const;
 
     //enable MULTI_CLICK feature default true
     void setMultiClickFeature(bool enable);

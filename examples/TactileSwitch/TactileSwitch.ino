@@ -18,26 +18,24 @@ TactileSwitch mySwitch3(A4, 3, HIGH);
 
 void setup()
 {
-  //put your setup code here, to run once:
-  //use as fast enough serial out, otherwise you miss switch events
+  //use a fast enough serial out, otherwise you miss switch events
   Serial.begin(57600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
-  mySwitch1.readSwitch();
+  mySwitch1.readSwitch();//read mySwitch1
   mySwitch2.readSwitch();
   mySwitch3.readSwitch();
 
-  processEventTactileSwitch(mySwitch1);
-  processEventTactileSwitch(mySwitch2);
-  processEventTactileSwitch(mySwitch3);
+  processTactileSwitch(mySwitch1);//prosess event mySwitch1
+  processTactileSwitch(mySwitch2);
+  processTactileSwitch(mySwitch3);
 
   //delay(10);//to test _message = POLLING_LONG
 }
 
-void processEventTactileSwitch(TactileSwitch& mySwitch)
+void processTactileSwitch(TactileSwitch& mySwitch)
 {
   //get event
   switch (mySwitch.getEvent())
