@@ -22,28 +22,20 @@ Repository Contents
 Documentation
 --------------
 The library enables the following functions:
-<hr>
 
 #### General methods for class
-<hr>
 ###### TactileSwitch(uint8_t buttonPin, uint8_t number, uint8_t mode = HIGH, bool enablePullUp = false)
-<hr>
 
 #### Get events and messages
-<hr>
 ###### event_t getEvent() const;
 ###### message_t getMessage() const;
 ###### void readSwitch(void);
-<hr>
 
 #### Get various information
-<hr>
 ###### int8_t getClicks (void) const;
 ###### uint8_t getState();
 
-<hr>
 #### Configuration
-<hr>
 ###### void setMultiClickFeature(bool enable);
 ###### void setDurationDebouncePressed(uint8_t durationDebouncePressed);
 ###### void setDurationDebounceReleased(uint8_t durationDebounceReleased);
